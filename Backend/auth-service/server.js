@@ -5,12 +5,13 @@ import cors from "cors";
 const app = express();
 app.use(express.json());
 
-const PORT = 3000;
+const PORT = 3001;
 
 app.get("/health", (req, res) => {
   res.status(200).json({
-    success: true,
-    message: "Currently on the PORT 3000🚀",
+    service: "auth-service 👨🏼‍💻",
+    status: "UP ✅",
+    port: 4001,
   });
 });
 
