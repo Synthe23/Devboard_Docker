@@ -89,7 +89,7 @@ const loginUserController = async (req, res) => {
 
     return res.status(200).json({
       message: "Login Succesfull!",
-      user: userData,
+      user,
       token,
     });
   } catch (error) {
@@ -103,7 +103,7 @@ const loginUserController = async (req, res) => {
 // getMe Controller
 const getMeController = async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId);
+    const user = await User.findById(req.user.id);
 
     if (!user) {
       return res.status(404).json({
@@ -115,7 +115,7 @@ const getMeController = async (req, res) => {
       message: "User details fetched succesfully",
 
       user: {
-        id: user._id,
+        id: user.id,
         username: user.username,
         email: user.email,
         createdAt: user.createdAt,
@@ -130,4 +130,4 @@ const getMeController = async (req, res) => {
   }
 };
 
-export { registerUsercontroller, loginUserController };
+export { registerUsercontroller, loginUserController, getMeController };
