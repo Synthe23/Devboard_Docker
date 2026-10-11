@@ -1,5 +1,10 @@
 import express from "express";
-import { registerUsercontroller, loginUserController, getMeController } from "../controllers/auth.controller.js";
+import {
+  registerUsercontroller,
+  loginUserController,
+  getMeController,
+} from "../controllers/auth.controller.js";
+import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
@@ -7,9 +12,9 @@ const router = express.Router();
 router.post("/api/register", registerUsercontroller);
 
 // LOGIN Controller
-router.post("/api/login", loginUserController);
+router.post("/api/login", authMiddleware, loginUserController);
 
 // GET-ME Controller
-router.get("/api/me", getMeController);
+router.get("/api/me", authMiddleware, getMeController);
 
 export default router;
