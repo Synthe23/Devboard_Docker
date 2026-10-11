@@ -4,7 +4,6 @@ import cors from "cors";
 import router from "./routes/user.routes.js";
 import connectDB from "./config/db.js";
 
-// Load .env vars
 dotenv.config();
 
 connectDB();
@@ -18,9 +17,9 @@ app.use(express.json());
 const PORT = process.env.PORT || 4001;
 
 // Health Check route
-app.get("/health", (req, res) => {
+app.get("/auth/health", (req, res) => {
   res.status(200).json({
-    service: "auth-service 👨🏼‍💻",
+    service: "auth-service is running succesfully👨🏼‍💻",
     status: "UP ✅",
     port: PORT, 
   });
