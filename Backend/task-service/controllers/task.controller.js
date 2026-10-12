@@ -46,7 +46,25 @@ export async function createTaskController(req, res) {
 
 // Get all the task controller
 export async function getAllTaskController(req, res) {
-    
+  try {
+    const tasks = await Task.find().sort({ createdAt: -1 });
+    return res.status(200).json({
+      success: true,
+      message: "Tasks fetched succesfully!",
+      length: tasks.length,
+      tasks,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Something went wrong!",
+      error: error.message,
+    });
+  }
 }
 
-export { createTaskController };
+// Get a task by id
+export async function getTaskByIdController(req, res) {
+  
+}
+
+export { createTaskController, getAllTaskController, getTaskByIdController };
