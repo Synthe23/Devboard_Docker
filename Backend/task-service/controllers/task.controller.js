@@ -64,7 +64,47 @@ export async function getAllTaskController(req, res) {
 
 // Get a task by id
 export async function getTaskByIdController(req, res) {
-  
+  try {
+    const { id } = req.params;
+
+    // Find the task by id
+    const task = await Task.findById({ id });
+
+    // If not available
+    if (!task) {
+      return res.status(400).json({
+        message: "Task not found with the provided ID!",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Query Succesfull!",
+      task,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Something went wrong!",
+      error: error.message,
+    });
+  }
+}
+
+// Update the task by ID 
+export async function updateTaskByIdController(req, res) {
+  const {id} = req.params;
+
+  const task = await Task.findById({id});
+
+  if(!task){
+    return res.status(400).json({
+      message: "No tasks with the id!"
+    });
+  }
+
+  const newTask = await Task.findByIdAndUpdate({
+
+  });
 }
 
 export { createTaskController, getAllTaskController, getTaskByIdController };
