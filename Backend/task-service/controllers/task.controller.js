@@ -1,10 +1,12 @@
 import express from "express";
 import Task from "../models/task.model.js";
 
-// Create a new task controller
-export async function createTaskController(req, res) {
+// Create a new task
+ async function createTaskController(req, res) {
   try {
     const { title, description, status, priority } = req.body;
+
+    const userId = req.user.userId;
 
     // 1. Receive data from req body
     if (!title || !description || !status || !priority) {
@@ -12,13 +14,9 @@ export async function createTaskController(req, res) {
         message: "Please enter all the required fields!",
       });
     }
+
     // 2. Create a new task
-    const task = new Task({
-      title,
-      description,
-      status,
-      priority,
-    });
+    const task = new Task({ userId, title, description, status, priority });
 
     // 3. Save the task
     const savedTask = await task.save();
@@ -26,31 +24,30 @@ export async function createTaskController(req, res) {
     // 4. Return the created task
     return res.status(201).json({
       success: true,
-      message: "Task created succesfully!",
+      message: "Task created successfully!",
       savedTask,
     });
   } catch (error) {
-    console.error("Error creating task: ", error.message);
-
-    if (error.name === "ValidationError") {
-      return res.status(400).json({
-        message: "Mongoose validation error!",
-      });
-    }
-
+    // console.error("Error creating task: ", error.message);
+    // if (error.name === "ValidationError") {
+    //   return res.status(400).json({
+    //     message: "Mongoose validation error!",
+    //   });
+    // }
     return res.status(500).json({
       message: "Server error!",
+      error: error.message
     });
   }
 }
 
-// Get all the task controller
-export async function getAllTaskController(req, res) {
+// Get all tasks
+ async function getAllTaskController(req, res) {
   try {
     const tasks = await Task.find().sort({ createdAt: -1 });
     return res.status(200).json({
       success: true,
-      message: "Tasks fetched succesfully!",
+      message: "Tasks fetched successfully!",
       length: tasks.length,
       tasks,
     });
@@ -63,23 +60,23 @@ export async function getAllTaskController(req, res) {
 }
 
 // Get a task by id
-export async function getTaskByIdController(req, res) {
+ async function getTaskByIdController(req, res) {
   try {
     const { id } = req.params;
 
-    // Find the task by id
-    const task = await Task.findById({ id });
+    // FIX: Pass 'id' directly instead of an object '{ id }'
+    const task = await Task.findById(id);
 
-    // If not available
     if (!task) {
-      return res.status(400).json({
+      return res.status(404).json({
+        // Changed from 400 to 404 (Not Found)
         message: "Task not found with the provided ID!",
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: "Query Succesfull!",
+      message: "Query Successful!",
       task,
     });
   } catch (error) {
@@ -91,12 +88,14 @@ export async function getTaskByIdController(req, res) {
 }
 
 // Update the task by ID
-export async function updateTaskByIdController(req, res) {
+ async function updateTaskByIdController(req, res) {
   try {
     const { id } = req.params;
 
-    const task = await Task.findById(id);
+    // FIX: Destructure values from req.body so they are defined
+    const { title, description, status, priority } = req.body;
 
+    const task = await Task.findById(id);
     if (!task) {
       return res.status(404).json({
         success: false,
@@ -106,17 +105,10 @@ export async function updateTaskByIdController(req, res) {
 
     const updatedTask = await Task.findByIdAndUpdate(
       id,
-      {
-        title,
-        description,
-        status,
-        priority,
-      },
-      {
-        new: true,
-        runValidators: true,
-      }
+      { title, description, status, priority },
+      { new: true, runValidators: true }
     );
+
     return res.status(200).json({
       success: true,
       message: "Task updated successfully!",
@@ -131,23 +123,24 @@ export async function updateTaskByIdController(req, res) {
 }
 
 // Find a task by id and delete
-export async function deleteTaskByIdController(req, res) {
+async function deleteTaskByIdController(req, res) {
   try {
     const { id } = req.params;
 
-    const task = await Task.findById({ id });
-
+    // FIX: Pass 'id' directly instead of an object '{ id }'
+    const task = await Task.findById(id);
     if (!task) {
       return res.status(404).json({
-        message: `No task with this ${id}`,
+        message: `No task with this ID: ${id}`,
       });
     }
 
-    const deletedTask = await Task.findByIdAndDelete({ id });
+    // FIX: Pass 'id' directly instead of an object '{ id }'
+    const deletedTask = await Task.findByIdAndDelete(id);
 
     return res.status(200).json({
       success: true,
-      message: "Task deleted Succesfully!",
+      message: "Task deleted Successfully!",
       deletedTask,
     });
   } catch (error) {
@@ -161,7 +154,7 @@ export async function deleteTaskByIdController(req, res) {
 export {
   createTaskController,
   getAllTaskController,
-  getTaskByIdController,
   updateTaskByIdController,
+  getTaskByIdController,
   deleteTaskByIdController
-};
+}

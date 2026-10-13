@@ -1,10 +1,13 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import routes from "./routes/task.routes.js";
+import connectDB from "./config/db.js";
 
 const app = express();
 
 dotenv.config();
+connectDB();
 
 app.use(express.json());
 app.use(cors());
@@ -19,6 +22,9 @@ app.get("/task/health", (req, res) => {
     port: PORT,
   });
 });
+
+// Main routes
+app.use("/api", routes);
 
 app.listen(PORT, () => {
   console.log(`Task service running on the PORT: ${PORT}`);
