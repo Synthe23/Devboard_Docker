@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import authRouter from "./routes/auth.routes.js";
 
 dotenv.config();
 const app = express();
@@ -12,16 +13,18 @@ const PORT = process.env.PORT || 4000;
 
 // Health check route to check the health of the application
 app.get("/gateway/health", (req, res) => {
-    return res.status(200).json({
-        success: true,
-        service: "API-Gateway",
-        status: "Running✅",
-        timestamp: new Date().toLocaleTimeString()
-    });
+  return res.status(200).json({
+    success: true,
+    service: "API-Gateway",
+    status: "Running✅",
+    timestamp: new Date().toLocaleTimeString(),
+  });
 });
 
+app.use("/api/auth", authRouter); // So the current endpoint is: http://localhost:4000/api/auth/...
+
 app.listen(PORT, () => {
-    console.log(`Gateway running on PORT: ${PORT}`);
-})
+  console.log(`Gateway running on PORT: ${PORT}`);
+});
 
 export default app;

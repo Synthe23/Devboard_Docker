@@ -101,31 +101,35 @@ const loginUserController = async (req, res) => {
 };
 
 // getMe Controller
+// Get Current User Controller
 const getMeController = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.userId).select("-password");
 
     if (!user) {
       return res.status(404).json({
+        success: false,
         message: "User not found!",
       });
     }
 
     return res.status(200).json({
-      message: "User details fetched succesfully",
-
+      success: true,
+      message: "User details fetched successfully!",
       user: {
-        id: user.id,
-        username: user.username,
+        id: user._id,
+        name: user.name,
         email: user.email,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       },
     });
   } catch (error) {
+    console.error("Get current user error:", error.message);
+
     return res.status(500).json({
+      success: false,
       message: "Something went wrong!",
-      error: error.message,
     });
   }
 };
