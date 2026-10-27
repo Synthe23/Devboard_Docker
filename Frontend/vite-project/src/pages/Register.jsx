@@ -1,5 +1,7 @@
+import axios from "axios";
 import React from "react";
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 function RegisterUser() {
   const [name, setName] = useState("");
@@ -7,23 +9,63 @@ function RegisterUser() {
   const [pass, setPass] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
 
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
+
+  const navigate = useNavigate();
+
   function validateform(e) {
     e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (name.trim() === "") {
-      return "Empty name!";
+      setError("Empty name!");
     }
 
-    if (email.trim().toLowerCase() === "" || !email.includes("@gmail.com")) {
-      return "Email field empty or not in valid format";
+    if (email.trim().toLowerCase() === "" || !emailRegex.test(email)) {
+      setError("Email field empty or not in valid format");
     }
 
     if (pass.trim() === "") {
-      return "Empty password field";
+      setError("Empty password field");
+    }
+
+    if (pass.length < 8) {
+      setError("Password length shall be atleast 8 chars long!");
     }
 
     if (confirmPass.trim() === "" || confirmPass !== pass) {
-      return "Empty or different password than password!";
+      setError("Empty or different password than password!");
+      return;
+    }
+
+    // Regestration request to backend
+    try {
+      setLoading(true);
+
+      const response = axios.post("/auth/api/register/", {
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        password: pass.trim(),
+      });
+
+      setSuccess(response.data.message || "Registration succesfull!");
+
+      setName("");
+      setEmail("");
+      setPass("");
+      setConfirmPass("");
+    } catch (error) {
+      setError(
+        error.response?.data?.message ||
+          "Registration failed! Please try again later!"
+      );
+    } finally {
+      setLoading(false);
     }
   }
 
