@@ -13,7 +13,7 @@ const router = express.Router();
 router.use(authMiddleware);
 
 // Create task route
-router.post("/task/createTask", createTaskController);
+router.post("/task/createTask", authMiddleware, createTaskController);
 
 // Get all the task route
 router.get("/task/getAllTask", authMiddleware, getAllTaskController);

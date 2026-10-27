@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import authRouter from "./routes/auth.routes.js";
+import taskRouter from "./routes/task.routes.js";
 
 dotenv.config();
 const app = express();
@@ -22,6 +23,7 @@ app.get("/gateway/health", (req, res) => {
 });
 
 app.use("/api/auth", authRouter); // So the current endpoint is: http://localhost:4000/api/auth/...
+app.use("/api/task", taskRouter);
 
 app.listen(PORT, () => {
   console.log(`Gateway running on PORT: ${PORT}`);

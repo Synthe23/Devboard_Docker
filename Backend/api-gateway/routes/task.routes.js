@@ -3,16 +3,20 @@ import axios from "axios";
 
 const taskRouter = express.Router();
 
+// Forward the user’s authorization token
+const getAuthHeaders = (req) => ({
+  Authorization: req.headers.authorization || "",
+});
+
 // Create task
 taskRouter.post("/createTask", async (req, res) => {
   try {
     const response = await axios.post(
-      `${process.env.TASK_SERVICE_URL}/task/createTask`,
-      req.body,
+      `
+${process.env.TASK_SERVICE_URL}/api/task/createTask,
+req.body`,
       {
-        headers: {
-          Authorization: req.headers.authorization || "",
-        },
+        headers: getAuthHeaders(req),
       }
     );
 
@@ -23,7 +27,6 @@ taskRouter.post("/createTask", async (req, res) => {
     }
 
     console.error("Task-Service error:", error.message);
-
     return res.status(502).json({
       success: false,
       message: "Task-Service unavailable!",
@@ -35,11 +38,10 @@ taskRouter.post("/createTask", async (req, res) => {
 taskRouter.get("/getAllTasks", async (req, res) => {
   try {
     const response = await axios.get(
-      `${process.env.TASK_SERVICE_URL}/task/getAllTask`,
+      `
+${process.env.TASK_SERVICE_URL}/api/task/getAllTask`,
       {
-        headers: {
-          Authorization: req.headers.authorization || "",
-        },
+        headers: getAuthHeaders(req),
       }
     );
 
@@ -50,7 +52,6 @@ taskRouter.get("/getAllTasks", async (req, res) => {
     }
 
     console.error("Task-Service error:", error.message);
-
     return res.status(502).json({
       success: false,
       message: "Task-Service unavailable!",
@@ -64,14 +65,11 @@ taskRouter.get("/getTaskById/:id", async (req, res) => {
     const { id } = req.params;
 
     const response = await axios.get(
-      `${process.env.TASK_SERVICE_URL}/task/getTaskById/${id}`,
+      `${process.env.TASK_SERVICE_URL}/api/task/taskById/${id}`,
       {
-        headers: {
-          Authorization: req.headers.authorization || "",
-        },
+        headers: getAuthHeaders(req),
       }
     );
-
     return res.status(response.status).json(response.data);
   } catch (error) {
     if (error.response) {
@@ -79,7 +77,6 @@ taskRouter.get("/getTaskById/:id", async (req, res) => {
     }
 
     console.error("Task-Service error:", error.message);
-
     return res.status(502).json({
       success: false,
       message: "Task-Service unavailable!",
@@ -93,15 +90,12 @@ taskRouter.patch("/updateTaskById/:id", async (req, res) => {
     const { id } = req.params;
 
     const response = await axios.patch(
-      `${process.env.TASK_SERVICE_URL}/task/updateById/${id}`,
+      `${process.env.TASK_SERVICE_URL}/api/task/updateById/${id}`,
       req.body,
       {
-        headers: {
-          Authorization: req.headers.authorization || "",
-        },
+        headers: getAuthHeaders(req),
       }
     );
-
     return res.status(response.status).json(response.data);
   } catch (error) {
     if (error.response) {
@@ -109,7 +103,6 @@ taskRouter.patch("/updateTaskById/:id", async (req, res) => {
     }
 
     console.error("Task-Service error:", error.message);
-
     return res.status(502).json({
       success: false,
       message: "Task-Service unavailable!",
@@ -123,14 +116,11 @@ taskRouter.delete("/deleteTaskById/:id", async (req, res) => {
     const { id } = req.params;
 
     const response = await axios.delete(
-      `${process.env.TASK_SERVICE_URL}/task/deleteById/${id}`,
+      `${process.env.TASK_SERVICE_URL}/api/task/deleteById/${id}`,
       {
-        headers: {
-          Authorization: req.headers.authorization || "",
-        },
+        headers: getAuthHeaders(req),
       }
     );
-
     return res.status(response.status).json(response.data);
   } catch (error) {
     if (error.response) {
@@ -138,7 +128,6 @@ taskRouter.delete("/deleteTaskById/:id", async (req, res) => {
     }
 
     console.error("Task-Service error:", error.message);
-
     return res.status(502).json({
       success: false,
       message: "Task-Service unavailable!",
