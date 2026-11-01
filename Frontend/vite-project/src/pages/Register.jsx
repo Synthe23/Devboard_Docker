@@ -1,7 +1,6 @@
-import axios from "axios";
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import api from "../services/api.js";
 
 function RegisterUser() {
   const [name, setName] = useState("");
@@ -15,54 +14,63 @@ function RegisterUser() {
 
   const navigate = useNavigate();
 
-  function validateform(e) {
+  async function validateform(e) {
     e.preventDefault();
+
     setError("");
     setSuccess("");
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (name.trim() === "") {
-      setError("Empty name!");
-    }
-
-    if (email.trim().toLowerCase() === "" || !emailRegex.test(email)) {
-      setError("Email field empty or not in valid format");
-    }
-
-    if (pass.trim() === "") {
-      setError("Empty password field");
-    }
-
-    if (pass.length < 8) {
-      setError("Password length shall be atleast 8 chars long!");
-    }
-
-    if (confirmPass.trim() === "" || confirmPass !== pass) {
-      setError("Empty or different password than password!");
+      setError("Name is required!");
       return;
     }
 
-    // Regestration request to backend
+    if (!emailRegex.test(email.trim())) {
+      setError("Please enter a valid email address!");
+      return;
+    }
+
+    if (pass.trim() === "") {
+      setError("Password is required!");
+      return;
+    }
+
+    if (pass.length < 8) {
+      setError("Password must be at least 8 characters long!");
+      return;
+    }
+
+    if (confirmPass === "" || confirmPass !== pass) {
+      setError("Passwords do not match!");
+      return;
+    }
+
     try {
       setLoading(true);
 
-      const response = axios.post("/auth/api/register/", {
+      const response = await api.post("/api/auth/register", {
         name: name.trim(),
         email: email.trim().toLowerCase(),
-        password: pass.trim(),
+        password: pass,
       });
 
-      setSuccess(response.data.message || "Registration succesfull!");
+      setSuccess(response.data.message || "Registration successful!");
 
       setName("");
       setEmail("");
       setPass("");
       setConfirmPass("");
+
+      // Give the user a moment to read the success message.
+      setTimeout(() => {
+        navigate("/login");
+      }, 1000);
     } catch (error) {
       setError(
         error.response?.data?.message ||
-          "Registration failed! Please try again later!"
+          "Registration failed! Please try again later."
       );
     } finally {
       setLoading(false);
@@ -71,50 +79,88 @@ function RegisterUser() {
 
   return (
     <div>
-      <form action="" onSubmit={validateform}>
-        <input
-          type="text"
-          name="name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          id="name"
-          placeholder="Enter your name..."
-        />
-        <input
-          type="text"
-          name="email"
-          id="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Enter your email..."
-        />
-        <input
-          type="text"
-          name="pass"
-          id="pass"
-          onChange={(e) => setPass(e.target.value)}
-          value={pass}
-          placeholder="Enter your password..."
-        />
-        <input
-          type="text"
-          name="confirmPass"
-          id="confirmPass"
-          onChange={(e) => setConfirmPass(e.target.value)}
-          value={confirmPass}
-          placeholder="Re-enter password..."
-        />
-        <button>Register!</button>
+      <h1>Create an account</h1>
+
+      <form onSubmit={validateform}>
+        <div>
+          <label htmlFor="name">Full Name</label>
+          <input
+            type="text"
+            name="name"
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Enter your name..."
+            autoComplete="name"
+            required
+          />
+        </div>
+
+        <div>
+          <label htmlFor="email">Email</label>
+          <input
+            type="email"
+            name="email"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email..."
+            autoComplete="email"
+            required
+          />
+        </div>
+
+        <div>
+          <label htmlFor="pass">Password</label>
+          <input
+            type="password"
+            name="pass"
+            id="pass"
+            value={pass}
+            onChange={(e) => setPass(e.target.value)}
+            placeholder="Enter your password..."
+            autoComplete="new-password"
+            minLength={8}
+            required
+          />
+        </div>
+
+        <div>
+          <label htmlFor="confirmPass">Confirm Password</label>
+          <input
+            type="password"
+            name="confirmPass"
+            id="confirmPass"
+            value={confirmPass}
+            onChange={(e) => setConfirmPass(e.target.value)}
+            placeholder="Re-enter your password..."
+            autoComplete="new-password"
+            required
+          />
+        </div>
+
+        {error && (
+          <p role="alert" style={{ color: "red" }}>
+            {error}
+          </p>
+        )}
+
+        {success && (
+          <p role="status" style={{ color: "green" }}>
+            {success}
+          </p>
+        )}
+
+        <button type="submit" disabled={loading}>
+          {loading ? "Registering..." : "Register"}
+        </button>
       </form>
+
+      <p>
+        Already have an account? <Link to="/login">Login here</Link>
+      </p>
     </div>
   );
 }
 
 export default RegisterUser;
-
-// fullname
-// email
-// password
-// confirm password
-// register button
-// link to the login page
