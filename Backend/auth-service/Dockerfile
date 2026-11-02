@@ -12,4 +12,4 @@ COPY . .
 
 EXPOSE 4001
 
-CMD ["pnpm", "start"]
+CMD [ "pnpm", "start" ]
