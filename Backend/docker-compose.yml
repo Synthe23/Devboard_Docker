@@ -1,0 +1,117 @@
+services:
+
+# DB
+  mongodb:
+    image: mongo:8
+    container_name: devboard-mongodb
+    restart: unless-stopped
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - devboard-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "--quiet",
+          "--eval",
+          "db.adminCommand('ping').ok"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+
+# Auth-Service
+  auth-service:
+    build:
+      context: ./backend/auth-service
+      dockerfile: Dockerfile
+    container_name: devboard-auth-service
+    restart: unless-stopped
+    environment:
+      PORT: 4001
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in the root .env file}
+      MONGO_URI: mongodb://mongodb:27017/devboard_auth
+    expose:
+      - "4001"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - devboard-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:4001/auth/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+
+# Task-Service
+  task-service:
+    build:
+      context: ./backend/task-service
+      dockerfile: Dockerfile
+    container_name: devboard-task-service
+    restart: unless-stopped
+    environment:
+      PORT: 4002
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in the root .env file}
+      MONGO_URI: mongodb://mongodb:27017/devboard_tasks
+    expose:
+      - "4002"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - devboard-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:4002/task/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+
+# API-Gateway
+  api-gateway:
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile
+    container_name: devboard-api-gateway
+    restart: unless-stopped
+    environment:
+      PORT: 4000
+      AUTH_SERVICE_URL: http://auth-service:4001
+      TASK_SERVICE_URL: http://task-service:4002
+    ports:
+      - "4000:4000"
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      task-service:
+        condition: service_healthy
+    networks:
+      - devboard-network
+
+networks:
+  devboard-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
