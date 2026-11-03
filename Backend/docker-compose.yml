@@ -1,6 +1,5 @@
 services:
-
-# DB
+  # DB
   mongodb:
     image: mongo:8
     container_name: devboard-mongodb
@@ -11,23 +10,16 @@ services:
       - devboard-network
     healthcheck:
       test:
-        [
-          "CMD",
-          "mongosh",
-          "--quiet",
-          "--eval",
-          "db.adminCommand('ping').ok"
-        ]
+        ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 15s
 
-
-# Auth-Service
+  # Auth-Service
   auth-service:
     build:
-      context: ./backend/auth-service
+      context: ./auth-service
       dockerfile: Dockerfile
     container_name: devboard-auth-service
     restart: unless-stopped
@@ -48,18 +40,17 @@ services:
           "CMD",
           "node",
           "-e",
-          "fetch('http://127.0.0.1:4001/auth/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+          "fetch('http://127.0.0.1:4001/auth/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
         ]
       interval: 15s
       timeout: 5s
       retries: 5
       start_period: 20s
 
-
-# Task-Service
+  # Task-Service
   task-service:
     build:
-      context: ./backend/task-service
+      context: ./task-service
       dockerfile: Dockerfile
     container_name: devboard-task-service
     restart: unless-stopped
@@ -80,18 +71,17 @@ services:
           "CMD",
           "node",
           "-e",
-          "fetch('http://127.0.0.1:4002/task/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+          "fetch('http://127.0.0.1:4002/task/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
         ]
       interval: 15s
       timeout: 5s
       retries: 5
       start_period: 20s
 
-
-# API-Gateway
+  # API-Gateway
   api-gateway:
     build:
-      context: ./backend/api-gateway
+      context: ./api-gateway
       dockerfile: Dockerfile
     container_name: devboard-api-gateway
     restart: unless-stopped

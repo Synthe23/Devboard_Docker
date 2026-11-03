@@ -6,7 +6,7 @@ import {
   updateTaskByIdController,
   deleteTaskByIdController
 } from "../controllers/task.controller.js";
-import authMiddleware from "../../auth-service/middlewares/auth.middleware.js";
+import authMiddleware from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
