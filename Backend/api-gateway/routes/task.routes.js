@@ -13,10 +13,12 @@ taskRouter.post("/createTask", async (req, res) => {
   try {
     const response = await axios.post(
       `
-${process.env.TASK_SERVICE_URL}/api/task/createTask,
-req.body`,
+${process.env.TASK_SERVICE_URL}/api/task/createTask`,
+req.body,
       {
-        headers: getAuthHeaders(req),
+        headers: {
+          Authorization: req.headers.authorization,
+        },
       }
     );
 
